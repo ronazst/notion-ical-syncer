@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda function NotionICalSyncer
+Resources:
+  NotionICalSyncer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Notion ICal syncer function
+      Architectures:
+        - x86_64
+      Runtime: go1.x
+      Handler: syncer
+      MemorySize: 512
+      Timeout: 30
+      CodeUri: ../../output/syncer.zip
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Tracing: Active
+      FunctionUrlConfig:
+        AuthType: NONE
+        InvokeMode: BUFFERED
+
+Outputs:
+  NotionICalSyncerEndpoint:
+    Description: NotionICalSyncer endpoint"
+    Value: !GetAtt NotionICalSyncerUrl.FunctionUrl

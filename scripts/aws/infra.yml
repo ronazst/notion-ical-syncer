@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Setup infra for NotionICalSyncer
+Resources:
+  NotionICalSyncerBucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Join
+        - '-'
+        - - 'notion-ical-syncer-temp-bin'
+          - !Ref AWS::AccountId
+          - !Select
+            - 0
+            - !Split
+              - '-'
+              - !Select
+                - 2
+                - !Split
+                  - /
+                  - !Ref AWS::StackId
+Outputs:
+  NotionICalSyncerBucketName:
+    Value: !Ref NotionICalSyncerBucket
