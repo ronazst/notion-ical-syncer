@@ -1,9 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: Lambda function NotionICalSyncer
+Description: Resources for lambda function NotionICalSyncer
 Resources:
   NotionICalSyncer:
     Type: AWS::Serverless::Function
+    DependsOn: NotionICalSyncerDynamoDBTable
     Properties:
       Description: Notion ICal syncer function
       Architectures:
@@ -16,9 +17,37 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
       Tracing: Active
+      Environment:
+        Variables:
+          DDB_TABLE: !Ref NotionICalSyncerDynamoDBTable
+          STACK_ID: !Select
+            - 2
+            - !Split
+              - /
+              - !Ref AWS::StackId
       FunctionUrlConfig:
         AuthType: NONE
         InvokeMode: BUFFERED
+  NotionICalSyncerDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join
+        - '-'
+        - - !Ref AWS::StackName
+          - !Select
+            - 2
+            - !Split
+              - /
+              - !Ref AWS::StackId
+      AttributeDefinitions:
+        - AttributeName: "config_id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "config_id"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
 
 Outputs:
   NotionICalSyncerEndpoint:

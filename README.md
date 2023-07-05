@@ -19,7 +19,7 @@ I already created a script to build and deploy this project, you just need to ru
 * Deploy AWS resource may charge you monthly
   * I already make the resource under free tier as possible as I can. But sadly, I can't avoid to use S3 inorder to simplify deployment process
 * Each deployment(with different suffix) will create 2 different AWS Cloudformation stack
-  * notion-ical-syncer-infra-<customized-cloudformation-stack-suffix>
-  * notion-ical-syncer-<customized-cloudformation-stack-suffix>
+  * notion-ical-syncer-infra (this shared between all lambda stack)
+  * notion-ical-syncer-stack-<customized-cloudformation-stack-suffix>
 * Once you want to delete it, go to AWS Cloudformation to delete related stack manually
 * The S3 bucket will not be deleted after you deleted AWS Cloudformation, so you have to delete related S3 manually
