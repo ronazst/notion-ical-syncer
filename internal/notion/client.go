@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jomei/notionapi"
-	"github.com/notion-ical-syncer/internal/model"
+	"github.com/ronazst/notion-ical-syncer/internal/model"
 	"time"
 )
 

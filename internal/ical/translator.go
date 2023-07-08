@@ -3,7 +3,7 @@ package ical
 import (
 	"errors"
 	"github.com/arran4/golang-ical"
-	"github.com/notion-ical-syncer/internal/model"
+	"github.com/ronazst/notion-ical-syncer/internal/model"
 	"time"
 )
 

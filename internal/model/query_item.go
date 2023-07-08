@@ -2,7 +2,7 @@ package model
 
 import (
 	"fmt"
-	"github.com/notion-ical-syncer/internal/util"
+	"github.com/ronazst/notion-ical-syncer/internal/util"
 	"strings"
 )
 
