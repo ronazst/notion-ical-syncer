@@ -1,5 +1,7 @@
 package model
 
+import "github.com/ronazst/notion-ical-syncer/internal/util"
+
 type NotionConfig struct {
 	ConfigId     string       `dynamodbav:"config_id"`
 	NotionDbId   string       `dynamodbav:"notion_db_id"`
@@ -8,10 +10,15 @@ type NotionConfig struct {
 }
 
 type FieldMapping struct {
-	Summary     string `dynamodbav:"summary"`
+	Title       string `dynamodbav:"title"`
 	Location    string `dynamodbav:"location"`
-	Date        string `dynamodbav:"date"`
-	CreatedTime string `dynamodbav:"created_time"`
 	Description string `dynamodbav:"description"`
-	URL         string `dynamodbav:"url"`
+	EventTime   string `dynamodbav:"event_time"`
+}
+
+func (n *NotionConfig) Validate() error {
+	if util.IsBlank(n.FieldMapping.Title) || util.IsBlank(n.FieldMapping.EventTime) {
+		return util.NewInternalError("The title and event_time field mapping is required")
+	}
+	return nil
 }

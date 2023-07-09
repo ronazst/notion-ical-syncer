@@ -2,66 +2,134 @@ package notion
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	ics "github.com/arran4/golang-ical"
 	"github.com/jomei/notionapi"
 	"github.com/ronazst/notion-ical-syncer/internal/model"
+	"github.com/ronazst/notion-ical-syncer/internal/util"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
-func QueryCalendarData(ctx context.Context, token string, items []model.QueryItem) ([]model.CalendarData, error) {
-	var calendarData []model.CalendarData
+func QueryEvents(ctx context.Context, configs []model.NotionConfig) ([]*ics.VEvent, error) {
+	var events []*ics.VEvent
 	date := notionapi.Date(time.Now())
-	client := notionapi.NewClient(notionapi.Token(token))
 
-	for _, item := range items {
-		response, err := client.Database.Query(ctx, notionapi.DatabaseID(item.DatabaseID), buildQueryRequest(item, date))
+	for _, config := range configs {
+		logger := logrus.WithField("config_id", config.ConfigId).WithField("notion_db_id", config.NotionDbId)
+		logger.Info("Start to query calendar data with notion config")
+
+		client := notionapi.NewClient(notionapi.Token(config.NotionToken))
+		response, err := client.Database.Query(ctx, notionapi.DatabaseID(config.NotionDbId), buildQueryRequest(config.FieldMapping, date))
 		if err != nil {
+			logger.WithError(err).Error("Failed to query calendar data with notion config")
 			return nil, err
 		}
 		for _, result := range response.Results {
-			data, err := buildCalendarData(result)
+			event, err := buildIcsVEvent(result, config.FieldMapping)
 			if err != nil {
 				return nil, err
 			}
-			calendarData = append(calendarData, *data)
+			events = append(events, event)
 		}
 	}
 
-	return calendarData, nil
+	return events, nil
 }
 
-func buildQueryRequest(item model.QueryItem, date notionapi.Date) *notionapi.DatabaseQueryRequest {
+func buildQueryRequest(mapping model.FieldMapping, date notionapi.Date) *notionapi.DatabaseQueryRequest {
 	return &notionapi.DatabaseQueryRequest{
 		Filter: notionapi.PropertyFilter{
-			Property: item.DateFieldKey,
+			Property: mapping.EventTime,
 			Date: &notionapi.DateFilterCondition{
 				OnOrAfter: &date,
 			},
 		},
 		Sorts: []notionapi.SortObject{{
-			Property:  item.DateFieldKey,
+			Property:  mapping.EventTime,
 			Direction: notionapi.SortOrderASC,
 		}},
 	}
 }
 
-func buildCalendarData(page notionapi.Page) (*model.CalendarData, error) {
-	var calData model.CalendarData
-	calData.Id = string(page.ID)
+func buildIcsVEvent(page notionapi.Page, mapping model.FieldMapping) (*ics.VEvent, error) {
+	event := ics.NewEvent(page.ID.String())
+	event.SetCreatedTime(page.CreatedTime)
+	event.SetModifiedAt(page.LastEditedTime)
+	event.SetURL(page.URL)
 
-	if name, ok := page.Properties["Name"].(*notionapi.TitleProperty); ok {
-		calData.Title = name.Title[0].PlainText
+	if prop, ok := page.Properties[mapping.Title]; ok && prop.GetType() == "title" {
+		event.SetSummary(prop.(*notionapi.TitleProperty).Title[0].PlainText)
 	} else {
-		return nil, errors.New("failed to get title")
+		return nil, util.NewInternalError("Failed to get title, please check your title field mapping")
 	}
-	if date, ok := page.Properties["Date"].(*notionapi.DateProperty); ok {
-		parsedTime, err := time.Parse(time.RFC3339, date.Date.Start.String())
+
+	if value, err := getTextPropValue(page.Properties, mapping.Title); err != nil {
+		return nil, err
+	} else {
+		event.SetSummary(value)
+	}
+
+	if err := setVEventTime(event, page.Properties, mapping.EventTime); err != nil {
+		return nil, err
+	}
+
+	if !util.IsBlank(mapping.Description) {
+		value, err := getTextPropValue(page.Properties, mapping.Description)
 		if err != nil {
 			return nil, err
 		}
-		calData.Date = parsedTime
-	} else {
-		return nil, errors.New("failed to get date")
+		event.SetDescription(value)
 	}
-	return &calData, nil
+	if !util.IsBlank(mapping.Location) {
+		value, err := getTextPropValue(page.Properties, mapping.Location)
+		if err != nil {
+			return nil, err
+		}
+		event.SetLocation(value)
+	}
+
+	return event, nil
+}
+
+func setVEventTime(event *ics.VEvent, properties notionapi.Properties, key string) error {
+	prop, ok := properties[key]
+	if !ok || prop.GetType() != "date" {
+		return util.NewInternalError("Failed to get event time, please check your event time field mapping")
+	}
+
+	startTime := (*time.Time)(prop.(*notionapi.DateProperty).Date.Start)
+	endTime := (*time.Time)(prop.(*notionapi.DateProperty).Date.End)
+	if startTime != nil && endTime != nil {
+		event.SetStartAt(*startTime)
+		event.SetEndAt(*endTime)
+	} else if startTime != nil {
+		event.SetAllDayStartAt(*startTime)
+	} else {
+		event.SetAllDayEndAt(*endTime)
+	}
+
+	return nil
+}
+
+func getTextPropValue(properties notionapi.Properties, key string) (string, error) {
+	prop, ok := properties[key]
+	if !ok {
+		return "", util.NewInternalError(fmt.Sprintf("The field %s does not in notion properties", key))
+	}
+	switch v := prop.(type) {
+	case *notionapi.RichTextProperty:
+		return getRichText(v.RichText), nil
+	case *notionapi.TitleProperty:
+		return getRichText(v.Title), nil
+	default:
+		return "", util.NewInternalError(fmt.Sprintf("The type %s does not support yet", prop.GetType()))
+	}
+}
+
+func getRichText(text []notionapi.RichText) string {
+	if len(text) == 0 {
+		return ""
+	}
+	return text[0].PlainText
 }

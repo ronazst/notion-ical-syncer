@@ -13,7 +13,8 @@ func Handle(ctx context.Context, event events.LambdaFunctionURLRequest) (events.
 	logrus.WithField("event", fmt.Sprintf("%+v", event)).Info("Query ICal with event")
 	responseContent, err := handleRequest(ctx, event)
 	response := events.LambdaFunctionURLResponse{
-		Body: responseContent,
+		StatusCode: http.StatusOK,
+		Body:       responseContent,
 	}
 	logrus.WithError(err).Info("Finished handling request")
 
