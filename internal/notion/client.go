@@ -45,10 +45,6 @@ func buildQueryRequest(mapping model.FieldMapping, date notionapi.Date) *notiona
 				OnOrAfter: &date,
 			},
 		},
-		Sorts: []notionapi.SortObject{{
-			Property:  mapping.EventTime,
-			Direction: notionapi.SortOrderASC,
-		}},
 	}
 }
 
