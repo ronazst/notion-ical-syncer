@@ -24,25 +24,14 @@ Resources:
       Environment:
         Variables:
           DDB_TABLE: !Ref NotionICalSyncerDynamoDBTable
-          STACK_ID: !Select
-            - 2
-            - !Split
-              - /
-              - !Ref AWS::StackId
+          STACK_ID: !Select [ "2", !Split [ "/", !Ref AWS::StackId ] ]
       FunctionUrlConfig:
         AuthType: NONE
         InvokeMode: BUFFERED
   NotionICalSyncerDynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Join
-        - '-'
-        - - !Ref AWS::StackName
-          - !Select
-            - 2
-            - !Split
-              - /
-              - !Ref AWS::StackId
+      TableName: !Join [ "-", [ !Ref AWS::StackName, !Select [ "2", !Split [ "/", !Ref AWS::StackId ] ] ] ]
       AttributeDefinitions:
         - AttributeName: "config_id"
           AttributeType: "S"
@@ -55,5 +44,5 @@ Resources:
 
 Outputs:
   NotionICalSyncerEndpoint:
-    Description: NotionICalSyncer endpoint"
-    Value: !GetAtt NotionICalSyncerUrl.FunctionUrl
+    Description: NotionICalSyncer endpoint
+    Value: !Join [ "", [ !GetAtt NotionICalSyncerUrl.FunctionUrl, !Select [ "2", !Split [ "/", !Ref AWS::StackId ] ] ] ]

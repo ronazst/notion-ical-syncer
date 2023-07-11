@@ -12,7 +12,16 @@ I already created a script to build and deploy this project, you just need to ru
     cd notion-ical-syncer
     #such as: ./scripts/build-and-deploy-to-aws.sh ronazst us-east-1
     ./scripts/build-and-deploy-to-aws.sh <customized-cloudformation-stack-suffix> <aws-region>
+    ./scripts/get-ical-url.sh <customized-cloudformation-stack-suffix> <aws-region>
 ```
+
+After the `get-ical-url.sh` command, you will see the url like this: `https://<id>.lambda-url.us-sourtheast-1.on.aws/<uuid>`
+
+Then open `https://<id>.lambda-url.us-sourtheast-1.on.aws/<uuid>/add-config` to add new config
+
+After you config has been added you will get a config id which can used to query ical content.
+
+The query format like this: `https://<id>.lambda-url.us-sourtheast-1.on.aws/<uuid>/ical?config_ids=<config_id_1>&&config_ids=<config_id_2>`
 
 ### Note
 

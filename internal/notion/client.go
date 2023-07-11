@@ -20,7 +20,7 @@ func QueryEvents(ctx context.Context, configs []model.NotionConfig) ([]*ics.VEve
 		logger.Info("Start to query calendar data with notion config")
 
 		client := notionapi.NewClient(notionapi.Token(config.NotionToken))
-		response, err := client.Database.Query(ctx, notionapi.DatabaseID(config.NotionDbId), buildQueryRequest(config.FieldMapping, date))
+		response, err := client.Database.Query(ctx, notionapi.DatabaseID(config.NotionDbId), buildQueryRequest(config, date))
 		if err != nil {
 			logger.WithError(err).Error("Failed to query calendar data with notion config")
 			return nil, err
@@ -37,15 +37,22 @@ func QueryEvents(ctx context.Context, configs []model.NotionConfig) ([]*ics.VEve
 	return events, nil
 }
 
-func buildQueryRequest(mapping model.FieldMapping, date notionapi.Date) *notionapi.DatabaseQueryRequest {
-	return &notionapi.DatabaseQueryRequest{
-		Filter: notionapi.PropertyFilter{
-			Property: mapping.EventTime,
-			Date: &notionapi.DateFilterCondition{
-				OnOrAfter: &date,
-			},
+func buildQueryRequest(config model.NotionConfig, date notionapi.Date) *notionapi.DatabaseQueryRequest {
+	filters := notionapi.AndCompoundFilter{notionapi.PropertyFilter{
+		Property: config.FieldMapping.EventTime,
+		Date: &notionapi.DateFilterCondition{
+			OnOrAfter: &date,
 		},
+	}}
+	for _, excludeStatus := range config.ExcludeStatus {
+		filters = append(filters, notionapi.PropertyFilter{
+			Property: config.ExcludeStatusKey,
+			Select: &notionapi.SelectFilterCondition{
+				DoesNotEqual: excludeStatus,
+			},
+		})
 	}
+	return &notionapi.DatabaseQueryRequest{Filter: filters}
 }
 
 func buildIcsVEvent(page notionapi.Page, mapping model.FieldMapping) (*ics.VEvent, error) {
