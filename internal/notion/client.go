@@ -130,9 +130,10 @@ func getTextPropValue(properties notionapi.Properties, key string) (string, erro
 	}
 }
 
-func getRichText(text []notionapi.RichText) string {
-	if len(text) == 0 {
-		return ""
+func getRichText(texts []notionapi.RichText) string {
+	result := ""
+	for _, text := range texts {
+		result += text.PlainText
 	}
-	return text[0].PlainText
+	return result
 }
