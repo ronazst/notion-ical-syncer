@@ -13,7 +13,8 @@ import (
 
 func QueryEvents(ctx context.Context, configs []model.NotionConfig) ([]*ics.VEvent, error) {
 	var events []*ics.VEvent
-	date := notionapi.Date(time.Now())
+	now := time.Now()
+	date := notionapi.Date(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()))
 
 	for _, config := range configs {
 		logger := logrus.WithField("config_id", config.ConfigId).WithField("notion_db_id", config.NotionDbId)

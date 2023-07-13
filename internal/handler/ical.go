@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-var DefaultInternalError = util.NewInternalError(util.MessageInternalServerError)
-
 func iCalHandler(request *http.Request) (string, error) {
 	configIds, err := getConfigIds(request)
 	if err != nil {
