@@ -12,7 +12,7 @@ fi
 STACK_SUFFIX="$1"
 AWS_REGION="$2"
 
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -o output/syncer cmd/syncer.go && cd output && zip syncer.zip syncer && cd ..
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -tags lambda.norpc -o output/syncer cmd/syncer.go && cd output && zip syncer.zip syncer && cd ..
 
 PROJECT_DIRECTORY="$(dirname "$(cd "$(dirname "$0")" && pwd)")"
 

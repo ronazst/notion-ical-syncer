@@ -6,10 +6,16 @@ import (
 	"strings"
 )
 
-func GetOsEnv(envKey string) (string, error) {
-	envValue := strings.TrimSpace(os.Getenv(envKey))
-	if len(envValue) == 0 {
-		return "", fmt.Errorf("invalid %s, please check your lambda environment variables", envKey)
+func GetOsEnv(envKey string) string {
+	return strings.TrimSpace(os.Getenv(envKey))
+}
+
+func CheckRequiredEnv() error {
+	if value := GetOsEnv(EnvStackId); len(value) == 0 {
+		return fmt.Errorf("invalid %s, please check your lambda environment variables", EnvStackId)
 	}
-	return envValue, nil
+	if value := GetOsEnv(EnvDdbTable); len(value) == 0 {
+		return fmt.Errorf("invalid %s, please check your lambda environment variables", EnvDdbTable)
+	}
+	return nil
 }
