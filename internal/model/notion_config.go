@@ -3,19 +3,19 @@ package model
 import "github.com/ronazst/notion-ical-syncer/internal/util"
 
 type NotionConfig struct {
-	ConfigId         string       `dynamodbav:"config_id"`
-	NotionDbId       string       `dynamodbav:"notion_db_id"`
-	NotionToken      string       `dynamodbav:"notion_token"`
-	FieldMapping     FieldMapping `dynamodbav:"field_mapping"`
-	ExcludeStatusKey string       `dynamodbav:"exclude_status_key"`
-	ExcludeStatus    []string     `dynamodbav:"exclude_status"`
+	ConfigId         string       `dynamodbav:"config_id" json:"config_id"`
+	NotionDbId       string       `dynamodbav:"notion_db_id" json:"notion_db_id"`
+	NotionToken      string       `dynamodbav:"notion_token" json:"notion_token"`
+	FieldMapping     FieldMapping `dynamodbav:"field_mapping" json:"field_mapping"`
+	ExcludeStatusKey string       `dynamodbav:"exclude_status_key" json:"exclude_status_key"`
+	ExcludeStatus    []string     `dynamodbav:"exclude_status" json:"exclude_status"`
 }
 
 type FieldMapping struct {
-	Title       string `dynamodbav:"title"`
-	Location    string `dynamodbav:"location"`
-	Description string `dynamodbav:"description"`
-	EventTime   string `dynamodbav:"event_time"`
+	Title       string `dynamodbav:"title" json:"title"`
+	Location    string `dynamodbav:"location"  json:"location"`
+	Description string `dynamodbav:"description" json:"description"`
+	EventTime   string `dynamodbav:"event_time" json:"eventTime"`
 }
 
 func (n *NotionConfig) Validate() error {

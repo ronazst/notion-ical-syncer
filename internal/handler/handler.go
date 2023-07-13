@@ -19,8 +19,14 @@ func NewHandler() (http.Handler, error) {
 
 	router := mux.NewRouter()
 	subRouter := router.PathPrefix(fmt.Sprintf("/%s", util.GetOsEnv(util.EnvStackId))).Subrouter()
-	subRouter.Methods(http.MethodGet).Path("/webui").Handler(http.StripPrefix("/webui", http.FileServer(http.FS(webFs))))
+	subRouter.Methods(http.MethodGet).Path("/webui").Handler(
+		http.StripPrefix(fmt.Sprintf("/%s/webui", util.GetOsEnv(util.EnvStackId)), http.FileServer(http.FS(webFs))),
+	)
 	subRouter.Methods(http.MethodGet).Path("/ical").HandlerFunc(wrap(iCalHandler))
+	subRouter.Methods(http.MethodGet).Path("/api/config").HandlerFunc(wrap(getConfigHandler))
+	subRouter.Methods(http.MethodPost).Path("/api/config").HandlerFunc(wrap(addConfigHandler))
+	subRouter.Methods(http.MethodPut).Path("/api/config").HandlerFunc(wrap(updateConfigHandler))
+	subRouter.Methods(http.MethodDelete).Path("/api/config").HandlerFunc(wrap(deleteConfigHandler))
 
 	return router, nil
 }

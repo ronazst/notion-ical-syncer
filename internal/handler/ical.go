@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"errors"
 	ics "github.com/arran4/golang-ical"
 	"github.com/ronazst/notion-ical-syncer/internal/awsutil"
 	"github.com/ronazst/notion-ical-syncer/internal/notion"
 	"github.com/ronazst/notion-ical-syncer/internal/util"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 )
@@ -39,7 +39,8 @@ func iCalHandler(request *http.Request) (string, error) {
 func getConfigIds(request *http.Request) ([]string, error) {
 	configIds := request.URL.Query().Get(util.QueryArgConfigIds)
 	if util.IsBlank(configIds) {
-		return nil, errors.New("user request without config_ids")
+		logrus.Error("user request without config_ids")
+		return nil, util.NewUserInputError("user request without config_ids")
 	}
 	return strings.Split(configIds, ","), nil
 }
