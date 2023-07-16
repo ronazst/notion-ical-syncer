@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"github.com/ronazst/notion-ical-syncer/internal/awsutil"
+	"github.com/ronazst/notion-ical-syncer/internal/model"
 	"github.com/ronazst/notion-ical-syncer/internal/util"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -33,7 +34,16 @@ func getConfigHandler(request *http.Request) (string, error) {
 }
 
 func addConfigHandler(request *http.Request) (string, error) {
-	return "add", nil
+	config := model.NotionConfig{}
+	err := json.NewDecoder(request.Body).Decode(&config)
+	if err != nil {
+		logrus.WithError(err).Error("failed decode request body to config")
+		return "", util.NewUserInputError("failed decode request body to config")
+	}
+	if err = awsutil.PutNotionConfig(util.GetOsEnv(util.EnvDdbTable), config); err != nil {
+		return "", err
+	}
+	return "", nil
 }
 
 func updateConfigHandler(request *http.Request) (string, error) {

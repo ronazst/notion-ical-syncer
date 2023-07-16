@@ -40,6 +40,7 @@ func QueryNotionConfigs(tableName string, configIds []string) ([]model.NotionCon
 		}
 		err = notionConfig.Validate()
 		if err != nil {
+			logger.WithField("config", fmt.Sprintf("%+v", notionConfig)).Error("AAAAAAAAAAAAAAAAAAAAA")
 			logger.WithError(err).Error("Invalid notion config")
 			return nil, util.NewInternalError("Invalid notion config")
 		}
@@ -47,4 +48,34 @@ func QueryNotionConfigs(tableName string, configIds []string) ([]model.NotionCon
 	}
 
 	return results, nil
+}
+
+func PutNotionConfig(tableName string, config model.NotionConfig) error {
+	logrus.WithField("config", fmt.Sprintf("%+v", config)).Error("BBBBBBBBBBBBBBBBBBBBBBB")
+	err := config.Validate()
+	if err != nil {
+		logrus.WithError(err).Error("Invalid notion config")
+		return err
+	}
+
+	ddbValue, err := dynamodbattribute.MarshalMap(config)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal dynamodb value")
+		return util.NewInternalError("Failed to marshal dynamodb value")
+	}
+
+	ddbClient := dynamodb.New(session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})))
+
+	_, err = ddbClient.PutItem(&dynamodb.PutItemInput{
+		TableName: aws.String(tableName),
+		Item:      ddbValue,
+	})
+	if err != nil {
+		logrus.WithError(err).Error("Failed to put item to dynamodb")
+		return util.NewInternalError("Failed to put item to dynamodb")
+	}
+
+	return nil
 }

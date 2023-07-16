@@ -1,6 +1,9 @@
 package model
 
-import "github.com/ronazst/notion-ical-syncer/internal/util"
+import (
+	"errors"
+	"github.com/ronazst/notion-ical-syncer/internal/util"
+)
 
 type NotionConfig struct {
 	ConfigId         string       `dynamodbav:"config_id" json:"config_id"`
@@ -15,15 +18,15 @@ type FieldMapping struct {
 	Title       string `dynamodbav:"title" json:"title"`
 	Location    string `dynamodbav:"location"  json:"location"`
 	Description string `dynamodbav:"description" json:"description"`
-	EventTime   string `dynamodbav:"event_time" json:"eventTime"`
+	EventTime   string `dynamodbav:"event_time" json:"event_time"`
 }
 
 func (n *NotionConfig) Validate() error {
 	if util.IsBlank(n.FieldMapping.Title) || util.IsBlank(n.FieldMapping.EventTime) {
-		return util.NewInternalError("The title and event_time field mapping is required")
+		return errors.New("the title and event_time field mapping is required")
 	}
 	if len(n.ExcludeStatus) != 0 && util.IsBlank(n.ExcludeStatusKey) {
-		return util.NewInternalError("Exclude status key is required when exclude status is specified")
+		return errors.New("exclude status key is required when exclude status is specified")
 	}
 	return nil
 }

@@ -1,22 +1,5 @@
 <HTML lang="en-US">
 <head>
-    <style>
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-    </style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <title>Notion ICal Syncer</title>
@@ -26,15 +9,19 @@
     <div class="row g-5">
         <div class="col-md-8 offset-md-2">
             <h4 class="mb-3">Query config</h4>
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Config ID" id="query-config-id">
-                <button class="btn btn-primary" onclick="queryConfig()">Query</button>
-            </div>
+            <form class="needs-validation" novalidate>
+                <div class="col-12">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="query-config-id"
+                               placeholder="Config created by yourself" required>
+                        <button type="submit" class="btn btn-primary" onclick="queryConfig()">Query</button>
+                    </div>
+                </div>
+            </form>
 
             <hr class="my-4">
 
             <h4 class="mb-3">Action</h4>
-            <div class="alert alert-primary" role="alert">Query config from server before update or delete</div>
 
             <div class="my-3">
                 <div class="form-check">
@@ -42,73 +29,71 @@
                     <label class="form-check-label" for="action-add">Add</label>
                 </div>
                 <div class="form-check">
-                    <input id="action-update" name="action" type="radio" class="form-check-input" required disabled>
+                    <input id="action-update" name="action" type="radio" class="form-check-input" required>
                     <label class="form-check-label" for="action-update">Update</label>
                 </div>
                 <div class="form-check">
-                    <input id="action-delete" name="action" type="radio" class="form-check-input" required disabled>
+                    <input id="action-delete" name="action" type="radio" class="form-check-input" required>
                     <label class="form-check-label" for="action-delete">Delete</label>
                 </div>
             </div>
 
             <hr class="my-4">
 
-            <h4 class="mb-3">Config</h4>
             <form class="needs-validation" id="config-form" novalidate>
+                <h4 class="mb-3">Config</h4>
                 <div class="row g-3">
                     <div class="col-12">
                         <label for="config-id" class="form-label">Config ID</label>
-                        <input type="text" class="form-control" id="config-id" placeholder=""
-                               oninput="inputToConfigObj()" required>
+                        <input type="text" class="form-control" id="config-id"
+                               placeholder="calendar-xxx-for-life-task" required>
                         <div class="invalid-feedback">Config ID is required.</div>
                     </div>
                     <div class="col-12">
                         <label for="notion-db-id" class="form-label">Notion DB ID</label>
-                        <input type="text" class="form-control" id="notion-db-id" placeholder=""
-                               oninput="inputToConfigObj()" required>
+                        <input type="text" class="form-control" id="notion-db-id"
+                               placeholder="1234567890abcdefghijklmnopqrstuv" required>
                         <div class="invalid-feedback">Notion DB ID is required.</div>
                     </div>
                     <div class="col-12">
-                        <label for="notion-token" class="form-label">Notion token</label>
-                        <input type="text" class="form-control" id="notion-token" placeholder=""
-                               oninput="inputToConfigObj()" required>
+                        <label for="notion-token" class="form-label">Notion token <span
+                                class="text-body-secondary">(Conditional, only need when add new)</span></label>
+                        <input type="text" class="form-control" id="notion-token"
+                               placeholder="secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
                         <div class="invalid-feedback">Notion token is required.</div>
                     </div>
                     <div class="col-12">
                         <label for="exclude-status-key" class="form-label">Exclude status key <span
                                 class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="exclude-status-key" placeholder=""
-                               oninput="inputToConfigObj()">
+                        <input type="text" class="form-control" id="exclude-status-key" placeholder="Status">
                     </div>
                     <div class="col-12">
-                        <label for="exclude-status" class="form-label">Exclude status <span class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="exclude-status" placeholder=""
-                               oninput="inputToConfigObj()">
+                        <label for="exclude-status" class="form-label">Exclude status <span
+                                class="text-body-secondary">(Optional)</span></label>
+                        <input type="text" class="form-control" id="exclude-status"
+                               placeholder="Done,Cancel,Archived">
                     </div>
                     <div class="col-12">
                         <label for="field-mapping-title" class="form-label">Field mapping - title</label>
-                        <input type="text" class="form-control" id="field-mapping-title" placeholder=""
-                               oninput="inputToConfigObj()" required>
+                        <input type="text" class="form-control" id="field-mapping-title" placeholder="Name" required>
                         <div class="invalid-feedback">Field mapping - title is required.</div>
                     </div>
                     <div class="col-12">
                         <label for="field-mapping-event-time" class="form-label">Field mapping - event time</label>
-                        <input type="text" class="form-control" id="field-mapping-event-time" placeholder=""
-                               oninput="inputToConfigObj()"
+                        <input type="text" class="form-control" id="field-mapping-event-time" placeholder="Date"
                                required>
                         <div class="invalid-feedback">Field mapping - event time is required.</div>
                     </div>
                     <div class="col-12">
                         <label for="field-mapping-description" class="form-label">Field mapping - description <span
                                 class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="field-mapping-description" placeholder=""
-                               oninput="inputToConfigObj()">
+                        <input type="text" class="form-control" id="field-mapping-description"
+                               placeholder="Description">
                     </div>
                     <div class="col-12">
                         <label for="field-mapping-location" class="form-label">Field mapping - location <span
                                 class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="field-mapping-location" placeholder=""
-                               oninput="inputToConfigObj()">
+                        <input type="text" class="form-control" id="field-mapping-location" placeholder="Location">
                     </div>
                 </div>
                 <hr class="my-4">
@@ -125,32 +110,17 @@
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
 <script>
-    let config = {
-        config_id: "",
-        notion_db_id: "",
-        notion_token: "",
-        exclude_status_key: "",
-        exclude_status: [],
-        field_mapping: {
-            title: "",
-            location: "",
-            description: "",
-            event_time: ""
-        }
-    };
-
     const queryConfig = () => {
         const configId = document.getElementById("query-config-id").value
+        if (configId === "") {
+            return
+        }
         fetch("api/config?config_id=" + configId, {
             method: "GET",
             cache: "no-cache",
-            headers: {
-                "Content-Type": "application/json",
-            },
             redirect: "follow",
         }).then(response => response.json()).then(data => {
-            config = data[0]
-            configObjToInput()
+            configObjToInput(data[0])
             document.getElementById('action-update').disabled = false
             document.getElementById('action-delete').disabled = false
         }).catch(err => {
@@ -159,8 +129,43 @@
         })
     }
 
-    const inputToConfigObj = () => {
-        config = {
+    const addConfig = () => {
+        fetch("api/config", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(getConfigFromInput())
+        }).then(() => {
+            alert("Add config successful")
+        }).catch(err => {
+            alert("Failed to get config")
+            console.log(err)
+        })
+    }
+
+    const executeAction = () => {
+        for (const radio of document.getElementsByName('action')) {
+            if (!radio.checked) {
+                continue
+            }
+            switch (radio.id) {
+                case 'action-add':
+                    document.getElementById("config-id").disabled = false
+                    addConfig()
+                    break
+                case 'action-update':
+                    document.getElementById("config-id").disabled = true
+                    break
+                case 'action-delete':
+                    document.getElementById("config-id").disabled = true
+                    break
+            }
+        }
+    }
+
+    const getConfigFromInput = () => {
+        return  {
             config_id: document.getElementById("config-id").value,
             notion_db_id: document.getElementById("notion-db-id").value,
             notion_token: document.getElementById("notion-token").value,
@@ -175,7 +180,7 @@
         }
     }
 
-    const configObjToInput = () => {
+    const configObjToInput = (config) => {
         document.getElementById("config-id").value = config.config_id
         document.getElementById("notion-db-id").value = config.notion_db_id
         document.getElementById("notion-token").value = ""
@@ -187,29 +192,10 @@
         document.getElementById("field-mapping-event-time").valu = config.field_mapping.event_time
     }
 
-    const executeAction = () => {
-        for (const radio of document.getElementsByName('action')) {
-            if (!radio.checked) {
-                continue
-            }
-            switch (radio.id) {
-                case 'action-add':
-                    break
-                case 'action-update':
-                    document.getElementById("config-id").disabled = true
-                    break
-                case 'action-delete':
-                    break
-            }
-        }
-    }
-
     Array.from(document.querySelectorAll('.needs-validation')).forEach(form => {
         form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
+            event.preventDefault()
+            event.stopPropagation()
             form.classList.add('was-validated')
         }, false)
     })
