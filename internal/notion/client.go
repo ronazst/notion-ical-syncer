@@ -45,13 +45,15 @@ func buildQueryRequest(config model.NotionConfig, date notionapi.Date) *notionap
 			OnOrAfter: &date,
 		},
 	}}
-	for _, excludeStatus := range config.ExcludeStatus {
-		filters = append(filters, notionapi.PropertyFilter{
-			Property: config.ExcludeStatusKey,
-			Select: &notionapi.SelectFilterCondition{
-				DoesNotEqual: excludeStatus,
-			},
-		})
+	if !util.IsBlank(config.ExcludeStatusKey) {
+		for _, excludeStatus := range config.ExcludeStatus {
+			filters = append(filters, notionapi.PropertyFilter{
+				Property: config.ExcludeStatusKey,
+				Select: &notionapi.SelectFilterCondition{
+					DoesNotEqual: excludeStatus,
+				},
+			})
+		}
 	}
 	return &notionapi.DatabaseQueryRequest{Filter: filters}
 }
