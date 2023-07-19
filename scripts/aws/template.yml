@@ -16,9 +16,7 @@ Resources:
       CodeUri: ../../output/syncer.zip
       Policies:
         - AWSLambdaBasicExecutionRole
-        - DynamoDBReadPolicy:
-            TableName: !Ref NotionICalSyncerDynamoDBTable
-        - DynamoDBWritePolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref NotionICalSyncerDynamoDBTable
       Tracing: Active
       Environment:

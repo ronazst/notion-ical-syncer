@@ -24,9 +24,7 @@ func NewHandler() (http.Handler, error) {
 	)
 	subRouter.Methods(http.MethodGet).Path("/ical").HandlerFunc(wrap(iCalHandler))
 	subRouter.Methods(http.MethodGet).Path("/api/config").HandlerFunc(wrap(getConfigHandler))
-	subRouter.Methods(http.MethodPost).Path("/api/config").HandlerFunc(wrap(addConfigHandler))
-	subRouter.Methods(http.MethodPut).Path("/api/config").HandlerFunc(wrap(updateConfigHandler))
-	subRouter.Methods(http.MethodDelete).Path("/api/config").HandlerFunc(wrap(deleteConfigHandler))
+	subRouter.Methods(http.MethodPost, http.MethodDelete).Path("/api/config").HandlerFunc(wrap(changeConfigHandler))
 
 	return router, nil
 }

@@ -16,40 +16,42 @@ func getConfigHandler(request *http.Request) (string, error) {
 		return "", util.NewUserInputError("config_id is required and can no be blank")
 	}
 
-	configs, err := awsutil.QueryNotionConfigs(util.GetOsEnv(util.EnvDdbTable), []string{configId})
+	config, err := awsutil.QueryNotionConfigs(util.GetOsEnv(util.EnvDdbTable), []string{configId})
 	if err != nil {
 		return "", err
 	}
-	for i := 0; i < len(configs); i++ {
-		configs[i].NotionToken = ""
+	if len(config) == 0 {
+		return "", util.NewUserInputError("config not found")
 	}
+	config[0].NotionToken = ""
 
-	data, err := json.Marshal(configs)
+	data, err := json.Marshal(config[0])
 	if err != nil {
-		logrus.WithError(err).Error("failed marshal configs to json")
+		logrus.WithError(err).Error("failed marshal config to json")
 		return "", err
 	}
 
 	return string(data), nil
 }
 
-func addConfigHandler(request *http.Request) (string, error) {
+func changeConfigHandler(request *http.Request) (string, error) {
 	config := model.NotionConfig{}
 	err := json.NewDecoder(request.Body).Decode(&config)
 	if err != nil {
 		logrus.WithError(err).Error("failed decode request body to config")
 		return "", util.NewUserInputError("failed decode request body to config")
 	}
-	if err = awsutil.PutNotionConfig(util.GetOsEnv(util.EnvDdbTable), config); err != nil {
-		return "", err
+
+	switch request.Method {
+	case http.MethodPost:
+		if err = awsutil.AddOrUpdateNotionConfig(util.GetOsEnv(util.EnvDdbTable), config); err != nil {
+			return "", err
+		}
+	case http.MethodDelete:
+		if err = awsutil.DeleteNotionConfig(util.GetOsEnv(util.EnvDdbTable), config.ConfigId); err != nil {
+			return "", err
+		}
 	}
+
 	return "", nil
-}
-
-func updateConfigHandler(request *http.Request) (string, error) {
-	return "update", nil
-}
-
-func deleteConfigHandler(request *http.Request) (string, error) {
-	return "delete", nil
 }

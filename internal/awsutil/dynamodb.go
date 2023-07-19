@@ -50,12 +50,22 @@ func QueryNotionConfigs(tableName string, configIds []string) ([]model.NotionCon
 	return results, nil
 }
 
-func PutNotionConfig(tableName string, config model.NotionConfig) error {
-	logrus.WithField("config", fmt.Sprintf("%+v", config)).Error("BBBBBBBBBBBBBBBBBBBBBBB")
+func AddOrUpdateNotionConfig(tableName string, config model.NotionConfig) error {
 	err := config.Validate()
 	if err != nil {
 		logrus.WithError(err).Error("Invalid notion config")
 		return err
+	}
+
+	if util.IsBlank(config.NotionToken) {
+		notionConfig, err := QueryNotionConfigs(tableName, []string{config.ConfigId})
+		if err != nil {
+			return err
+		}
+		if len(notionConfig) == 0 {
+			return util.NewUserInputError("Notion token is required")
+		}
+		config.NotionToken = notionConfig[0].NotionToken
 	}
 
 	ddbValue, err := dynamodbattribute.MarshalMap(config)
@@ -77,5 +87,28 @@ func PutNotionConfig(tableName string, config model.NotionConfig) error {
 		return util.NewInternalError("Failed to put item to dynamodb")
 	}
 
+	return nil
+}
+
+func DeleteNotionConfig(tableName string, configId string) error {
+	ddbClient := dynamodb.New(session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})))
+	_, err := ddbClient.DeleteItem(&dynamodb.DeleteItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"config_id": {
+				S: aws.String(configId),
+			},
+		},
+	})
+	if _, ok := err.(*dynamodb.ResourceNotFoundException); ok {
+		logrus.WithError(err).Error("Config not found")
+		return util.NewUserInputError("Config not found")
+	}
+	if err != nil {
+		logrus.WithError(err).Error("Failed to delete item from dynamodb")
+		return util.NewInternalError("Failed to delete item from dynamodb")
+	}
 	return nil
 }

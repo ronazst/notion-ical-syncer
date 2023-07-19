@@ -1,203 +1,216 @@
-<HTML lang="en-US">
+<HTML lang="en-US" xmlns="http://www.w3.org/1999/html">
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <title>Notion ICal Syncer</title>
 </head>
-<body>
-<div class="container">
-    <div class="row g-5">
-        <div class="col-md-8 offset-md-2">
-            <h4 class="mb-3">Query config</h4>
-            <form class="needs-validation" novalidate>
-                <div class="col-12">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="query-config-id"
-                               placeholder="Config created by yourself" required>
-                        <button type="submit" class="btn btn-primary" onclick="queryConfig()">Query</button>
-                    </div>
-                </div>
-            </form>
-
-            <hr class="my-4">
-
-            <h4 class="mb-3">Action</h4>
-
-            <div class="my-3">
-                <div class="form-check">
-                    <input id="action-add" name="action" type="radio" class="form-check-input" checked required>
-                    <label class="form-check-label" for="action-add">Add</label>
-                </div>
-                <div class="form-check">
-                    <input id="action-update" name="action" type="radio" class="form-check-input" required>
-                    <label class="form-check-label" for="action-update">Update</label>
-                </div>
-                <div class="form-check">
-                    <input id="action-delete" name="action" type="radio" class="form-check-input" required>
-                    <label class="form-check-label" for="action-delete">Delete</label>
+<body class="container">
+<div class="row g-5">
+    <div class="col-md-8 offset-md-2">
+        <h4 class="mb-3">Query config</h4>
+        <form class="needs-validation" id="query-form" novalidate>
+            <div class="col-12">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="query-config-id"
+                           placeholder="Config created by yourself" required>
+                    <button type="submit" class="btn btn-primary">Query</button>
                 </div>
             </div>
+        </form>
+        <hr class="my-4">
 
+        <h4 class="mb-3">Action</h4>
+        <div class="my-3">
+            <div class="form-check">
+                <input id="action-add-or-update" name="action" type="radio" class="form-check-input" checked
+                       required>
+                <label class="form-check-label" for="action-add-or-update">Add / Update</label>
+            </div>
+            <div class="form-check">
+                <input id="action-delete" name="action" type="radio" class="form-check-input" required>
+                <label class="form-check-label" for="action-delete">Delete</label>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <form class="needs-validation" id="config-form" novalidate>
+            <h4 class="mb-3">Config</h4>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="config-id" class="form-label">Config ID</label>
+                    <input type="text" class="form-control" id="config-id"
+                           placeholder="calendar-xxx-for-life-task" required>
+                </div>
+                <div class="col-12">
+                    <label for="notion-db-id" class="form-label">Notion DB ID</label>
+                    <input type="text" class="form-control" id="notion-db-id"
+                           placeholder="1234567890abcdefghijklmnopqrstuv" required>
+                </div>
+                <div class="col-12">
+                    <label for="notion-token" class="form-label">Notion token
+                        <span class="text-body-secondary">(Conditional)</span><br/>
+                        <span class="text-body-secondary">Only needed when add new config or update previous token</span>
+                    </label>
+                    <input type="text" class="form-control" id="notion-token"
+                           placeholder="secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                </div>
+                <div class="col-12">
+                    <label for="exclude-status-key" class="form-label">Exclude status key <span
+                            class="text-body-secondary">(Optional)</span></label>
+                    <input type="text" class="form-control" id="exclude-status-key" placeholder="Status">
+                </div>
+                <div class="col-12">
+                    <label for="exclude-status" class="form-label">Exclude status <span
+                            class="text-body-secondary">(Optional)</span></label>
+                    <input type="text" class="form-control" id="exclude-status"
+                           placeholder="Done,Cancel,Archived">
+                </div>
+                <div class="col-12">
+                    <label for="field-mapping-title" class="form-label">Field mapping - title</label>
+                    <input type="text" class="form-control" id="field-mapping-title" placeholder="Name" required>
+                </div>
+                <div class="col-12">
+                    <label for="field-mapping-event-time" class="form-label">Field mapping - event time</label>
+                    <input type="text" class="form-control" id="field-mapping-event-time" placeholder="Date"
+                           required>
+                </div>
+                <div class="col-12">
+                    <label for="field-mapping-description" class="form-label">Field mapping - description <span
+                            class="text-body-secondary">(Optional)</span></label>
+                    <input type="text" class="form-control" id="field-mapping-description"
+                           placeholder="Description">
+                </div>
+                <div class="col-12">
+                    <label for="field-mapping-location" class="form-label">Field mapping - location <span
+                            class="text-body-secondary">(Optional)</span></label>
+                    <input type="text" class="form-control" id="field-mapping-location" placeholder="Location">
+                </div>
+            </div>
             <hr class="my-4">
 
-            <form class="needs-validation" id="config-form" novalidate>
-                <h4 class="mb-3">Config</h4>
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label for="config-id" class="form-label">Config ID</label>
-                        <input type="text" class="form-control" id="config-id"
-                               placeholder="calendar-xxx-for-life-task" required>
-                        <div class="invalid-feedback">Config ID is required.</div>
-                    </div>
-                    <div class="col-12">
-                        <label for="notion-db-id" class="form-label">Notion DB ID</label>
-                        <input type="text" class="form-control" id="notion-db-id"
-                               placeholder="1234567890abcdefghijklmnopqrstuv" required>
-                        <div class="invalid-feedback">Notion DB ID is required.</div>
-                    </div>
-                    <div class="col-12">
-                        <label for="notion-token" class="form-label">Notion token <span
-                                class="text-body-secondary">(Conditional, only need when add new)</span></label>
-                        <input type="text" class="form-control" id="notion-token"
-                               placeholder="secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                        <div class="invalid-feedback">Notion token is required.</div>
-                    </div>
-                    <div class="col-12">
-                        <label for="exclude-status-key" class="form-label">Exclude status key <span
-                                class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="exclude-status-key" placeholder="Status">
-                    </div>
-                    <div class="col-12">
-                        <label for="exclude-status" class="form-label">Exclude status <span
-                                class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="exclude-status"
-                               placeholder="Done,Cancel,Archived">
-                    </div>
-                    <div class="col-12">
-                        <label for="field-mapping-title" class="form-label">Field mapping - title</label>
-                        <input type="text" class="form-control" id="field-mapping-title" placeholder="Name" required>
-                        <div class="invalid-feedback">Field mapping - title is required.</div>
-                    </div>
-                    <div class="col-12">
-                        <label for="field-mapping-event-time" class="form-label">Field mapping - event time</label>
-                        <input type="text" class="form-control" id="field-mapping-event-time" placeholder="Date"
-                               required>
-                        <div class="invalid-feedback">Field mapping - event time is required.</div>
-                    </div>
-                    <div class="col-12">
-                        <label for="field-mapping-description" class="form-label">Field mapping - description <span
-                                class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="field-mapping-description"
-                               placeholder="Description">
-                    </div>
-                    <div class="col-12">
-                        <label for="field-mapping-location" class="form-label">Field mapping - location <span
-                                class="text-body-secondary">(Optional)</span></label>
-                        <input type="text" class="form-control" id="field-mapping-location" placeholder="Location">
-                    </div>
+            <button class="w-100 btn btn-primary btn-lg" type="submit">Execute action
+            </button>
+        </form>
+    </div>
+    <div class="modal fade" tabindex="-1" id="message-modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" id="message-modal-header">
+                    <h5 class="modal-title">Action result</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <hr class="my-4">
-
-                <button class="w-100 btn btn-primary btn-lg" type="submit" onclick="executeAction()">Execute action
-                </button>
-            </form>
+                <div class="modal-body">
+                    <p id="message-modal-content"></p>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
 <script>
-    const queryConfig = () => {
-        const configId = document.getElementById("query-config-id").value
-        if (configId === "") {
-            return
-        }
-        fetch("api/config?config_id=" + configId, {
-            method: "GET",
-            cache: "no-cache",
-            redirect: "follow",
-        }).then(response => response.json()).then(data => {
-            configObjToInput(data[0])
-            document.getElementById('action-update').disabled = false
-            document.getElementById('action-delete').disabled = false
-        }).catch(err => {
-            alert("failed to get config")
-            console.log(err)
-        })
-    }
+    const success_color = 'text-bg-success'
+    const error_color = 'text-bg-danger'
 
-    const addConfig = () => {
-        fetch("api/config", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(getConfigFromInput())
-        }).then(() => {
-            alert("Add config successful")
-        }).catch(err => {
-            alert("Failed to get config")
-            console.log(err)
-        })
-    }
-
-    const executeAction = () => {
-        for (const radio of document.getElementsByName('action')) {
-            if (!radio.checked) {
-                continue
-            }
-            switch (radio.id) {
-                case 'action-add':
-                    document.getElementById("config-id").disabled = false
-                    addConfig()
-                    break
-                case 'action-update':
-                    document.getElementById("config-id").disabled = true
-                    break
-                case 'action-delete':
-                    document.getElementById("config-id").disabled = true
-                    break
-            }
-        }
-    }
-
-    const getConfigFromInput = () => {
-        return  {
-            config_id: document.getElementById("config-id").value,
-            notion_db_id: document.getElementById("notion-db-id").value,
-            notion_token: document.getElementById("notion-token").value,
-            exclude_status_key: document.getElementById("exclude-status-key").value,
-            exclude_status: document.getElementById("exclude-status").value.split(","),
-            field_mapping: {
-                title: document.getElementById("field-mapping-title").value,
-                location: document.getElementById("field-mapping-location").value,
-                description: document.getElementById("field-mapping-description").value,
-                event_time: document.getElementById("field-mapping-event-time").value
-            }
-        }
-    }
-
-    const configObjToInput = (config) => {
-        document.getElementById("config-id").value = config.config_id
-        document.getElementById("notion-db-id").value = config.notion_db_id
-        document.getElementById("notion-token").value = ""
-        document.getElementById("exclude-status-key").value = config.exclude_status_key
-        document.getElementById("exclude-status").value = config.exclude_status.join(',')
-        document.getElementById("field-mapping-title").value = config.field_mapping.title
-        document.getElementById("field-mapping-location").value = config.field_mapping.location
-        document.getElementById("field-mapping-description").value = config.field_mapping.description
-        document.getElementById("field-mapping-event-time").valu = config.field_mapping.event_time
-    }
-
-    Array.from(document.querySelectorAll('.needs-validation')).forEach(form => {
+    Array.from(document.getElementsByClassName('needs-validation')).forEach(form => {
         form.addEventListener('submit', event => {
             event.preventDefault()
             event.stopPropagation()
             form.classList.add('was-validated')
+            if (!form.checkValidity()) {
+            } else if (form.id === 'query-form') {
+                query_config()
+            } else if (form.id === 'config-form') {
+                change_config()
+            }
         }, false)
     })
+
+    const query_config = () => {
+        const configId = document.getElementById('query-config-id').value
+        send_request('api/config?config_id=' + configId, 'GET', null, (response) => {
+            response.json().then(config_obj_to_input)
+        })
+    }
+
+    const change_config = () => {
+        for (const radio of document.getElementsByName('action')) {
+            if (!radio.checked) {
+                continue
+            }
+            if (radio.id === 'action-add-or-update') {
+                config_change_request('POST')
+            } else if (radio.id === 'action-delete') {
+                config_change_request('DELETE')
+            }
+        }
+    }
+
+    const config_change_request = (method) => {
+        send_request('api/config', method, JSON.stringify(get_config_from_input()), () => {
+            show_message(success_color, 'Succeed')
+        })
+    }
+
+    const send_request = (url, method, body, success_handler) => {
+        fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json',},
+            body: body
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Got error response from server')
+            }
+            success_handler(response)
+        }).catch((err) => {
+            console.log(err)
+            show_message(error_color, 'Failed to perform action')
+        })
+    }
+
+    const show_message = (color, message) => {
+        const modal = new bootstrap.Modal('#message-modal', {
+            keyboard: false
+        });
+        get_element('message-modal-header').classList.remove(success_color, error_color)
+        get_element('message-modal-header').classList.add(color)
+        get_element('message-modal-content').textContent = message
+        modal.show()
+    }
+
+    const get_config_from_input = () => {
+        return {
+            config_id: get_element('config-id').value,
+            notion_db_id: get_element('notion-db-id').value,
+            notion_token: get_element('notion-token').value,
+            exclude_status_key: get_element('exclude-status-key').value,
+            exclude_status: get_element('exclude-status').value.split(','),
+            field_mapping: {
+                title: get_element('field-mapping-title').value,
+                location: get_element('field-mapping-location').value,
+                description: get_element('field-mapping-description').value,
+                event_time: get_element('field-mapping-event-time').value
+            }
+        }
+    }
+
+    const config_obj_to_input = (config) => {
+        get_element('config-id').value = config.config_id
+        get_element('notion-db-id').value = config.notion_db_id
+        get_element('notion-token').value = ''
+        get_element('exclude-status-key').value = config.exclude_status_key
+        get_element('exclude-status').value = config.exclude_status.join(',')
+        get_element('field-mapping-title').value = config.field_mapping.title
+        get_element('field-mapping-location').value = config.field_mapping.location
+        get_element('field-mapping-description').value = config.field_mapping.description
+        get_element('field-mapping-event-time').value = config.field_mapping.event_time
+    }
+
+    const get_element = (id) => {
+        return document.getElementById(id)
+    }
 </script>
 </HTML>
